@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
 from . import util
@@ -19,4 +19,19 @@ def entry(request, title):
             "title": title,
             "entry": util.get_entry(title)
         })
-    # return HttpResponse(f"This is the entry page for {title}")
+
+def search(request):
+    term = request.POST['q']
+    entries = util.list_entries()
+    print(term)
+    for entry in entries:
+        if term.lower() == entry.lower():
+            return redirect('entry', title=term)
+        else:
+            return render(request, "encyclopedia/search.html", {
+                "term": term
+            })
+            # return render(request, "encyclopedia/entry.html", {
+            #     "title": entry,
+            #     "entry": util.get_entry(entry)
+            # })
