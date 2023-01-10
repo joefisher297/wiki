@@ -23,15 +23,21 @@ def entry(request, title):
 def search(request):
     term = request.POST['q']
     entries = util.list_entries()
-    print(term)
+    matches = []
     for entry in entries:
+        # Returning exact match page if there is one
         if term.lower() == entry.lower():
-            return redirect('entry', title=term)
-        else:
-            return render(request, "encyclopedia/search.html", {
-                "term": term
+            return redirect('entry', title=term.capitalize())
+
+        # Appending substring matches to a list
+        elif term.lower() in entry.lower():
+            matches.append(entry)
+            
+
+
+    # Return search page, with term and possibly empty list of partial matches passed in
+    return render(request, "encyclopedia/search.html", {
+                "term": term,
+                "matches": matches
             })
-            # return render(request, "encyclopedia/entry.html", {
-            #     "title": entry,
-            #     "entry": util.get_entry(entry)
-            # })
+
