@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django import forms
 
 from . import util
 
@@ -41,3 +42,35 @@ def search(request):
                 "matches": matches
             })
 
+def newpage(request):
+
+    # Checking to see whether we've just submitted this very form
+    if request.method == 'POST':
+        # Create a new form object with the data that's just been input 
+        form = NewPageForm(request.POST)
+
+        # If the form's good, create new string variables out of the inputs
+        if form.is_valid():
+            title = form.cleaned_data["newpagetitle"]
+            content = form.cleaned_data["newpagecontent"]
+
+            entries = util.list_entries()
+
+            for entry in entries:
+                if title.lower() == entry.lower():
+                    return redirect('index')
+
+
+            print(title)
+        return render(request, "encyclopedia/newpage.html", {
+        "form": NewPageForm()
+        })
+
+    
+
+
+
+
+class NewPageForm(forms.Form):
+    newpagetitle = forms.CharField(widget = forms.TextInput(attrs={'class': 'form-control', 'id': 'titleinput', 'style': 'max-width: 300px;'}), label="Page Title")
+    newpagecontent = forms.CharField(widget = forms.Textarea(attrs={'class': 'form-control'}), label="Page Content")
