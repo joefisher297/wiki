@@ -11,7 +11,7 @@
 <form action="{% url 'editpage' title%}" method="post">
     {% csrf_token %}
     {{ form }}
-    <input type="submit">
+    <input type="submit" value="Save">
 </form>
 
 {% endblock %}

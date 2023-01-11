@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django import forms
 from django.contrib import messages
+import random
 
 from . import util
 
@@ -86,7 +87,7 @@ def editpage(request, title):
             title = form.cleaned_data["newpagetitle"]
             content = form.cleaned_data["newpagecontent"]
 
-
+            # Save (overwrite) the entry with the given title and send us to that page. 
             util.save_entry(title, content)
             return redirect('entry', title=title.capitalize())
 
@@ -97,7 +98,10 @@ def editpage(request, title):
 
     else:
         content = util.get_entry(title)
-        form = NewPageForm(initial={'newpagetitle': title, 'newpagecontent': content})
+        form = NewPageForm(initial= {
+            'newpagetitle': title, 
+            'newpagecontent': content
+        })
         return render(request, "encyclopedia/editpage.html", {
             "title": title,
             "entry": content,
@@ -105,10 +109,11 @@ def editpage(request, title):
         })  
 
 
+def randompage(request):
+    entries = util.list_entries()
+    entry = entries[random.randrange(len(entries))]
+    return redirect('entry', title=entry)
     
-
-
-    # return render(request, "encyclopedia/editpage.html")
 
 
 
@@ -118,6 +123,3 @@ class NewPageForm(forms.Form):
     newpagecontent = forms.CharField(widget = forms.Textarea(attrs={'class': 'form-control'}), label="Page Content")
   
 
-# class EditPageForm(NewPageForm):
-#     newpagetitle = forms.CharField(widget = forms.TextInput(attrs={'class': 'form-control', 'id': 'titleinput', 'style': 'max-width: 300px;'}), label="Page Title")
-#     newpagecontent = forms.CharField(widget = forms.Textarea(attrs={'class': 'form-control'}), label="Page Content")
