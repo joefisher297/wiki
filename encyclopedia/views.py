@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django import forms
+from django.contrib import messages
 
 from . import util
 
@@ -56,17 +57,58 @@ def newpage(request):
 
             entries = util.list_entries()
 
+            # Check if the entry already exists. If it does, reload the new entry page with an error message. 
             for entry in entries:
                 if title.lower() == entry.lower():
-                    return redirect('index')
+                    messages.warning(request,'That page already exists!')
+                    return render(request, "encyclopedia/newpage.html", {
+                        "form": NewPageForm()
+                    })
 
-
-            print(title)
-        return render(request, "encyclopedia/newpage.html", {
-        "form": NewPageForm()
-        })
+            # If we've made it this far, save the new entry and redirect us to that page 
+            util.save_entry(title, content)
+            return redirect('entry', title=title.capitalize())
 
     
+    # If we've been sent here by GET (i.e. clicked "Create New Page" on sidebar) return the page with a fresh form
+    return render(request, "encyclopedia/newpage.html", {
+    "form": NewPageForm()
+    })
+
+
+def editpage(request, title):
+
+    # If we've just submitted the form on the page
+    if request.method == 'POST':
+        form = NewPageForm(request.POST)
+
+        if form.is_valid():
+            title = form.cleaned_data["newpagetitle"]
+            content = form.cleaned_data["newpagecontent"]
+
+
+            util.save_entry(title, content)
+            return redirect('entry', title=title.capitalize())
+
+    elif util.get_entry(title) is None:
+        return render(request, "encyclopedia/error.html", {
+            "title": title
+        })
+
+    else:
+        content = util.get_entry(title)
+        form = NewPageForm(initial={'newpagetitle': title, 'newpagecontent': content})
+        return render(request, "encyclopedia/editpage.html", {
+            "title": title,
+            "entry": content,
+            "form": form
+        })  
+
+
+    
+
+
+    # return render(request, "encyclopedia/editpage.html")
 
 
 
@@ -74,3 +116,8 @@ def newpage(request):
 class NewPageForm(forms.Form):
     newpagetitle = forms.CharField(widget = forms.TextInput(attrs={'class': 'form-control', 'id': 'titleinput', 'style': 'max-width: 300px;'}), label="Page Title")
     newpagecontent = forms.CharField(widget = forms.Textarea(attrs={'class': 'form-control'}), label="Page Content")
+  
+
+# class EditPageForm(NewPageForm):
+#     newpagetitle = forms.CharField(widget = forms.TextInput(attrs={'class': 'form-control', 'id': 'titleinput', 'style': 'max-width: 300px;'}), label="Page Title")
+#     newpagecontent = forms.CharField(widget = forms.Textarea(attrs={'class': 'form-control'}), label="Page Content")

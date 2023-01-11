@@ -17,6 +17,9 @@ textarea {
     width: 80%;
 }
 
+.messages {
+    color: red;
+}
 
 .main {
     padding: 10px;
