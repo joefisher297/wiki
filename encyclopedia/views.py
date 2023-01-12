@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django import forms
 from django.contrib import messages
 import random
+import markdown2
 
 from . import util
 
@@ -18,9 +19,10 @@ def entry(request, title):
             "title": title
         })
     else:
+        content = markdown2.markdown(util.get_entry(title))
         return render(request, "encyclopedia/entry.html", {
             "title": title,
-            "entry": util.get_entry(title)
+            "entry": content
         })
 
 def search(request):
@@ -84,7 +86,7 @@ def editpage(request, title):
         form = NewPageForm(request.POST)
 
         if form.is_valid():
-            title = form.cleaned_data["newpagetitle"]
+            #title = form.cleaned_data["newpagetitle"]
             content = form.cleaned_data["newpagecontent"]
 
             # Save (overwrite) the entry with the given title and send us to that page. 

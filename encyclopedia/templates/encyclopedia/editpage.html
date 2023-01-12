@@ -10,7 +10,9 @@
 
 <form action="{% url 'editpage' title%}" method="post">
     {% csrf_token %}
-    {{ form }}
+    <h2>{{ title }}</h2>
+    <div style="display: none">{{ form.newpagetitle }}</div>
+    {{ form.newpagecontent }}
     <input type="submit" value="Save">
 </form>
 
